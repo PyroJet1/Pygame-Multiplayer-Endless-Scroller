@@ -4,11 +4,11 @@ from spritesheet import Spritesheet
 class Player:
     def __init__(self, screen):
         self.screen = screen
-        self.player = pygame.Rect((300, 250, 50, 50))
+        self.player = pygame.Rect(0, self.screen.get_height() - 105, 63, 105)
+
+        # Load and process sprite sheet
         self.sprite_sheet = pygame.image.load('sprites/charachter_animations_sprite.png') #21x33
         self.sheet = Spritesheet(self.sprite_sheet)
-
-        #animation list
         self.animation_steps = [8,1,2,1]
         self.animation_list = []
         self.last_updated = pygame.time.get_ticks()
@@ -16,6 +16,8 @@ class Player:
         self.frame = 0
         self.step_counter = 0
         self.action = 0
+        self.animation_cooldown = 100
+        self.last_updated = pygame.time.get_ticks()
 
         for animation in self.animation_steps:
             temp_img_list = []
@@ -24,30 +26,53 @@ class Player:
                 self.step_counter += 1
             self.animation_list.append(temp_img_list)
 
+        # Movement and physics
+        self.speed = 5
+        self.gravity = 1.0
+        self.jump_strength = -20
+        self.velocity_y = 0
+        self.is_jumping = False
+        self.ground_y = self.screen.get_height() - self.player.height
 
-    def movement(self):
-        pygame.draw.rect(self.screen, (255, 255, 255), self.player)
+    def movement(self, ground_segments):
+        keys = pygame.key.get_pressed()
 
-        #update animation
+        # Horizontal movement
+        if keys[pygame.K_a]:
+            self.player.x -= self.speed
+        elif keys[pygame.K_d]:
+            self.player.x += self.speed
+
+        # Jump if on the ground
+        if keys[pygame.K_SPACE] and not self.is_jumping:
+            self.velocity_y = self.jump_strength
+            self.is_jumping = True
+
+        # Apply gravity
+        self.velocity_y += self.gravity
+        self.player.y += self.velocity_y
+
+        # Check for collision with ground segments
+        on_ground = False
+        for segment in ground_segments:
+            if self.player.colliderect(segment) and self.velocity_y >= 0:
+                self.player.bottom = segment.top
+                self.velocity_y = 0
+                self.is_jumping = False
+                on_ground = True
+                break
+
+        if not on_ground:
+            self.is_jumping = True
+
+        # Update animation frame
         current_time = pygame.time.get_ticks()
         if current_time - self.last_updated > self.animation_cooldown:
             self.frame += 1
             if self.frame >= len(self.animation_list[self.action]):
                 self.frame = 0
-
             self.last_updated = current_time
 
-
-        self.screen.blit(self.animation_list[self.action][self.frame], (0,0))
-
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_a]:
-            self.player.move_ip(-20, 0)
-        elif keys[pygame.K_d]:
-            self.player.move_ip(20, 0)
-        elif keys[pygame.K_w]:
-            self.player.move_ip(0, -20)
-        elif keys[pygame.K_s]:
-            self.player.move_ip(0, 20)
-
-
+        # Draw the animated sprite at the player's current position
+        image = self.animation_list[self.action][self.frame]
+        self.screen.blit(image, self.player.topleft)

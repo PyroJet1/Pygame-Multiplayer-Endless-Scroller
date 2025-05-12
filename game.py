@@ -12,7 +12,7 @@ class Game:
        pygame.init()
        screen = pygame.display.set_mode((self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
        self.screen = screen
-       pygame.display.set_caption("LAST STAND")
+       pygame.display.set_caption("GAME NAME GOES HERE")
        self.background = Background(screen)
        self.player = Player(screen)
 
@@ -21,7 +21,17 @@ class Game:
         while self.run:
             dt = self.clock.tick(self.FPS) / 1000.0
             self.background.create_parallax(dt)
-            self.player.movement()
+
+            # Define ground with gaps
+            ground_segments = [
+                pygame.Rect(0, self.SCREEN_HEIGHT - 40, 400, 40),
+                pygame.Rect(500, self.SCREEN_HEIGHT - 40, 300, 40),
+                pygame.Rect(900, self.SCREEN_HEIGHT - 40, 400, 40),
+            ]
+            # Draw ground segments
+            for segment in ground_segments:
+                pygame.draw.rect(self.screen, (100, 70, 30), segment)
+            self.player.movement(ground_segments)
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
