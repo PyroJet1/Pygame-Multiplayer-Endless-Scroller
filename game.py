@@ -12,7 +12,7 @@ class Game:
        pygame.init()
        screen = pygame.display.set_mode((self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
        self.screen = screen
-       pygame.display.set_caption("GAME NAME GOES HERE")
+       pygame.display.set_caption("LAST STAND")
        self.background = Background(screen)
        self.player = Player(screen)
 
