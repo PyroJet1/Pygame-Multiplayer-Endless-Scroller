@@ -40,45 +40,47 @@ class Game:
             pygame.display.update()
 
     def run_game_menu(self):
-        font = pygame.font.SysFont("Arial", 72)
-        button_text = font.render("START GAME", True, (255, 255, 255))
-        button_rect = button_text.get_rect(center=(self.SCREEN_WIDTH // 2, self.SCREEN_HEIGHT // 2))
+        pygame.font.init()
+        font = pygame.font.SysFont("Arial", 48)
+
+        buttons = [
+            {"label": "START GAME", "action": "solo"},
+            {"label": "MULTIPLAYER", "action": "multiplayer"},
+            {"label": "QUIT", "action": "quit"}
+        ]
+
+        button_rects = []
+        for i, button in enumerate(buttons):
+            text_surf = font.render(button["label"], True, (255, 255, 255))
+            text_rect = text_surf.get_rect(center=(self.SCREEN_WIDTH // 2, 400 + i * 100))
+            button["surface"] = text_surf
+            button["rect"] = text_rect
+            button_rects.append(button)
 
         while self.run:
-            dt = 0.0001
-            self.background.create_parallax(dt)
+            self.background.create_parallax(0.0001)
 
-            delta_time = 0.001
+            # Slight dark overlay
             overlay = pygame.Surface((self.SCREEN_WIDTH, self.SCREEN_HEIGHT), pygame.SRCALPHA)
-            overlay.fill((0, 0, 0, 128))  # 128 = 35% opacity
-
+            overlay.fill((0, 0, 0, 90))  # Very light darkness
             self.screen.blit(overlay, (0, 0))
 
-            # Draw button background and text
-            pygame.draw.rect(self.screen, (0, 0, 0), button_rect.inflate(40, 20))  # button background
-            self.screen.blit(button_text, button_rect)
+            # Draw translucent buttons with text
+            for button in buttons:
+                rect = button["rect"]
+                bg = pygame.Surface(rect.inflate(30, 20).size, pygame.SRCALPHA)
+                bg.fill((0, 0, 0, 150))  # Translucent black
+                self.screen.blit(bg, rect.inflate(30, 20).topleft)
+                self.screen.blit(button["surface"], rect)
 
             # Handle events
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
-                    return False  # Will later quit program
+                    return "quit"
                 elif event.type == pygame.MOUSEBUTTONDOWN:
-                    if button_rect.collidepoint(event.pos):
-                        return True  # Signal to start game
+                    for button in buttons:
+                        if button["rect"].collidepoint(event.pos):
+                            return button["action"]
 
             pygame.display.update()
-
-        return None
-
-
-
-
-
-
-
-
-
-
-
-
