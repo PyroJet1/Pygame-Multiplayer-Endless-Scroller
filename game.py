@@ -19,7 +19,7 @@ class Game:
        self.world = World(screen)
 
     def run_game(self):
-
+        self.run = True
         while self.run:
             dt = self.clock.tick(self.FPS) / 1000.0
             self.background.create_parallax(dt)
@@ -44,6 +44,7 @@ class Game:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.run = False
+                    return "quit"
 
             self.world.world_run()
 
@@ -92,5 +93,49 @@ class Game:
                     for button in buttons:
                         if button["rect"].collidepoint(event.pos):
                             return button["action"]
+
+            pygame.display.update()
+
+    def run_multiplayer_menu(self):
+        pygame.font.init()
+        font = pygame.font.SysFont("Arial", 48)
+
+        buttons = [
+            {"label": "2 PLAYERS", "value": 2},
+            {"label": "3 PLAYERS", "value": 3},
+            {"label": "4 PLAYERS", "value": 4},
+            {"label": "BACK TO MAIN MENU", "value": "back"},
+        ]
+
+        for i, button in enumerate(buttons):
+            text_surf = font.render(button["label"], True, (255, 255, 255))
+            text_rect = text_surf.get_rect(center=(self.SCREEN_WIDTH // 2, 400 + i * 100))
+            button["surface"] = text_surf
+            button["rect"] = text_rect
+
+        while self.run:
+            self.background.create_parallax(0.0001)
+
+            overlay = pygame.Surface((self.SCREEN_WIDTH, self.SCREEN_HEIGHT), pygame.SRCALPHA)
+            overlay.fill((0, 0, 0, 90))
+            self.screen.blit(overlay, (0, 0))
+
+            for button in buttons:
+                rect = button["rect"]
+                bg = pygame.Surface(rect.inflate(30, 20).size, pygame.SRCALPHA)
+                bg.fill((0, 0, 0, 150))
+                self.screen.blit(bg, rect.inflate(30, 20).topleft)
+                self.screen.blit(button["surface"], rect)
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    return None
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    for button in buttons:
+                        if button["rect"].collidepoint(event.pos):
+                            if button["value"] == "back":
+                                return None  # go back to main menu
+                            return button["value"]
 
             pygame.display.update()
