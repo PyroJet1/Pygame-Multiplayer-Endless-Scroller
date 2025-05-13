@@ -17,29 +17,19 @@ class Game:
        self.background = Background(screen)
        self.player = Player(screen, 1)
        self.world = World(screen)
+       self.score = 0.0
+       self.font = pygame.font.SysFont("Arial", 36)
+       self.start_time = pygame.time.get_ticks()
 
     def run_game(self):
         self.run = True
         while self.run:
             dt = self.clock.tick(self.FPS) / 1000.0
             self.background.create_parallax(dt)
-
-            # Define ground with gaps
-            # ground_segments = [
-            #     pygame.Rect(0, self.SCREEN_HEIGHT - 40, 400, 40),
-            #     pygame.Rect(500, self.SCREEN_HEIGHT - 40, 300, 40),
-            #     pygame.Rect(900, self.SCREEN_HEIGHT - 40, 400, 40),
-            # ]
-            #
-            #
-            # # Draw ground segments
-            # for segment in ground_segments:
-            #     pygame.draw.rect(self.screen, (100, 70, 30), segment)
-            # self.player.movement(ground_segments)
+            self.calculate_score(dt)
 
             ground_rects = [tile.rect for tile in self.world.ground_sprites]
             self.player.movement(ground_rects)
-
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -47,8 +37,37 @@ class Game:
                     return "quit"
 
             self.world.world_run()
-
+            self.draw_score()
             pygame.display.update()
+
+    def calculate_score(self, dt):
+        # Time survived component (10 points/sec)
+        time_points = 100 * dt
+
+        # Position component (0-50 points/sec based on right position)
+        player_x = self.player.player.x
+        screen_width = self.screen.get_width()
+
+        # Ensure player X position stays within screen bounds (0 to screen_width)
+        # so we can fairly calculate how far to the right they've progressed
+        clamped_x = max(0, min(player_x, screen_width))
+        position_ratio = clamped_x / screen_width
+        position_points = 100 * position_ratio * dt
+
+        # Update total score
+        self.score += time_points + position_points
+
+    def draw_score(self):
+        # Create text surface
+        score_text = self.font.render(f"SCORE: {int(self.score)}", True, (255, 255, 255))
+        text_rect = score_text.get_rect(topright=(self.SCREEN_WIDTH - 20, 20))
+
+        # Create background rectangle
+        bg_rect = text_rect.inflate(20, 10)
+        pygame.draw.rect(self.screen, (0, 0, 0, 150), bg_rect)
+
+        # Draw elements
+        self.screen.blit(score_text, text_rect)
 
     def run_game_menu(self):
         pygame.font.init()
