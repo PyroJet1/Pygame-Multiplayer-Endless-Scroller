@@ -1,6 +1,7 @@
 import pygame
 from background import Background
 from player import Player
+from world import World
 
 class Game:
     def __init__(self):
@@ -15,6 +16,7 @@ class Game:
        pygame.display.set_caption("GAME NAME GOES HERE")
        self.background = Background(screen)
        self.player = Player(screen)
+       self.world = World(screen)
 
     def run_game(self):
 
@@ -23,19 +25,26 @@ class Game:
             self.background.create_parallax(dt)
 
             # Define ground with gaps
-            ground_segments = [
-                pygame.Rect(0, self.SCREEN_HEIGHT - 40, 400, 40),
-                pygame.Rect(500, self.SCREEN_HEIGHT - 40, 300, 40),
-                pygame.Rect(900, self.SCREEN_HEIGHT - 40, 400, 40),
-            ]
-            # Draw ground segments
-            for segment in ground_segments:
-                pygame.draw.rect(self.screen, (100, 70, 30), segment)
-            self.player.movement(ground_segments)
+            # ground_segments = [
+            #     pygame.Rect(0, self.SCREEN_HEIGHT - 40, 400, 40),
+            #     pygame.Rect(500, self.SCREEN_HEIGHT - 40, 300, 40),
+            #     pygame.Rect(900, self.SCREEN_HEIGHT - 40, 400, 40),
+            # ]
+            #
+            #
+            # # Draw ground segments
+            # for segment in ground_segments:
+            #     pygame.draw.rect(self.screen, (100, 70, 30), segment)
+            # self.player.movement(ground_segments)
+
+            ground_rects = [tile.rect for tile in self.world.ground_sprites]
+            self.player.movement(ground_rects)
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.run = False
+
+            self.world.world_run()
 
             pygame.display.update()
 

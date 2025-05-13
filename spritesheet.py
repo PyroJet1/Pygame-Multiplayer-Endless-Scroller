@@ -1,6 +1,6 @@
 import pygame
 
-class Spritesheet():
+class Spritesheet:
 
     def __init__(self, image):
         self.sprite_sheet = image
@@ -10,5 +10,4 @@ class Spritesheet():
         image.blit(self.sprite_sheet, (0, 0), ((frame * width),0, width, height))
         image = pygame.transform.scale(image, (width * scale, height * scale))
         image.set_colorkey((0, 0, 0))
-
         return image
