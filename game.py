@@ -7,7 +7,7 @@ class Game:
     def __init__(self):
        self.SCREEN_WIDTH = 1920
        self.SCREEN_HEIGHT = 1080
-       self.clock = pygame.time.Clock()
+       self.clock = 0
        self.FPS = 60
        self.run = True
        pygame.init()
@@ -15,11 +15,11 @@ class Game:
        self.screen = screen
        pygame.display.set_caption("GAME NAME GOES HERE")
        self.background = Background(screen)
-       self.player = Player(screen, 1)
+       self.player = Player(screen, 3)
        self.world = World(screen)
 
     def run_game(self):
-
+        self.clock = pygame.time.Clock()
         while self.run:
             dt = self.clock.tick(self.FPS) / 1000.0
             self.background.create_parallax(dt)
@@ -93,4 +93,7 @@ class Game:
                         if button["rect"].collidepoint(event.pos):
                             return button["action"]
 
+
+
             pygame.display.update()
+        return None
