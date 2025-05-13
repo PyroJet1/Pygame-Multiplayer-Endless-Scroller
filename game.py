@@ -15,7 +15,7 @@ class Game:
        self.screen = screen
        pygame.display.set_caption("GAME NAME GOES HERE")
        self.background = Background(screen)
-       self.player = Player(screen)
+       self.player = Player(screen, 1)
        self.world = World(screen)
 
     def run_game(self):
@@ -39,6 +39,7 @@ class Game:
 
             ground_rects = [tile.rect for tile in self.world.ground_sprites]
             self.player.movement(ground_rects)
+
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:

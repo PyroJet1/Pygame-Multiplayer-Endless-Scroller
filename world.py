@@ -4,12 +4,9 @@ from tile import Tile
 class World:
     def __init__(self, screen):
         self.screen = screen
-        grass = pygame.image.load("jungle-tileset/Grass1.png").convert_alpha()
-        self.Grass = pygame.transform.scale(grass, (64,64))
-        mud = pygame.image.load("jungle-tileset/mud.png").convert_alpha()
-        self.Mud = pygame.transform.scale(mud,(64,64))
-        deep= pygame.image.load("jungle-tileset/deepmud.png").convert_alpha()
-        self.Deep = pygame.transform.scale(deep,(64,64))
+        self.Grass = pygame.image.load("jungle-tileset/Grass1.png").convert_alpha()
+        self.Mud = pygame.image.load("jungle-tileset/mud.png").convert_alpha()
+        self.Deep = pygame.image.load("jungle-tileset/deepmud.png").convert_alpha()
         self.TILE_W, self.TILE_H = self.Grass.get_size()
         self.ground_sprites = pygame.sprite.Group()
         self.spawn_x = 0

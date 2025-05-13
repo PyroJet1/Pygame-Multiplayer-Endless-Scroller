@@ -2,12 +2,12 @@ import pygame
 from spritesheet import Spritesheet
 
 class Player:
-    def __init__(self, screen):
+    def __init__(self, screen, player):
         self.screen = screen
         self.player = pygame.Rect(0, self.screen.get_height() - 105, 63, 105)
 
         # Load and process sprite sheet
-        self.sprite_sheet = pygame.image.load('sprites/charachter_animations_sprite.png') #21x33
+        self.sprite_sheet = pygame.image.load(f'sprites/charachter_animations_sprite_p{player}.png') #21x33
         self.sheet = Spritesheet(self.sprite_sheet)
         self.animation_steps = [8,1,2,1]
         self.animation_list = []
