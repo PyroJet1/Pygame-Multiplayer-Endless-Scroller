@@ -7,7 +7,7 @@ class Game:
     def __init__(self):
        self.SCREEN_WIDTH = 1920
        self.SCREEN_HEIGHT = 1080
-       self.clock = pygame.time.Clock()
+       self.clock = 0
        self.FPS = 60
        self.run = True
        pygame.init()
@@ -22,7 +22,7 @@ class Game:
        self.start_time = pygame.time.get_ticks()
 
     def run_game(self):
-        self.run = True
+        self.clock = pygame.time.Clock()
         while self.run:
             dt = self.clock.tick(self.FPS) / 1000.0
             self.background.create_parallax(dt)
@@ -39,6 +39,7 @@ class Game:
             self.world.world_run()
             self.draw_score()
             pygame.display.update()
+        return None
 
     def calculate_score(self, dt):
         # Time survived component (10 points/sec)
@@ -114,6 +115,7 @@ class Game:
                             return button["action"]
 
             pygame.display.update()
+        return None
 
     def run_multiplayer_menu(self):
         pygame.font.init()
@@ -158,3 +160,4 @@ class Game:
                             return button["value"]
 
             pygame.display.update()
+        return None
