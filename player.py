@@ -18,6 +18,7 @@ class Player:
         self.action = 0
         self.animation_cooldown = 100
         self.last_updated = pygame.time.get_ticks()
+        self.game_over = False
 
         for animation in self.animation_steps:
             temp_img_list = []
@@ -107,7 +108,6 @@ class Player:
             self.player.x = int(self.position.x)
             self.velocity.x = 0
 
-
     def check_collisionsy(self, tiles):
         self.on_ground = False
         self.player.bottom += 1  # Small overlap to detect ground
@@ -125,3 +125,11 @@ class Player:
                 self.position.y = tile.rect.bottom + self.player.height
                 self.player.bottom = int(self.position.y)
         self.player.bottom -= 1  # Reset overlap check
+
+
+    def game_over(self):
+        if self.player.top > self.screen.get_height() or self.player.right < 0:
+            self.game_over = True
+
+        if not self.game_over:
+            self.update(self.last_updated, self.animation_list[self.action][self.frame])
