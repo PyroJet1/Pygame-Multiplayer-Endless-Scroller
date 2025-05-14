@@ -28,10 +28,15 @@ class World:
         self.start_x = 0
         self.start_y = 0
 
-        self.maps = ["maps/map1.csv", "maps/map2.csv", "maps/map3.csv", "maps/map4.csv", "maps/map5.csv", "maps/map6.csv", "maps/map7.csv"]
+        self.maps = []
 
-        self.load_tiles(self.maps[random.randint(0,6)], self.GROUND_SPEED, 0)
-        self.load_tiles(self.maps[random.randint(0,6)], self.GROUND_SPEED, 1)
+        for path in os.listdir("maps"):
+            self.maps.append(os.path.join("maps", path))
+
+        print(len(self.maps))
+
+        self.load_tiles("maps/map10.csv", self.GROUND_SPEED, 0)
+        self.load_tiles(self.maps[random.randint(0,(len(self.maps) - 1))], self.GROUND_SPEED, 1)
 
 
     def spawn_ground(self, column_group, spawn_x, speed, screen_height, filename):
@@ -90,9 +95,9 @@ class World:
     def world_run(self):
 
         self.start += self.GROUND_SPEED
-        if self.start > self.screen_width:
-            self.load_tiles(self.maps[random.randint(0,6)], self.GROUND_SPEED, 1)
-            self.start = 0
+        if self.start % self.screen_width == 0:
+            self.load_tiles(self.maps[random.randint(0,(len(self.maps) - 1))], self.GROUND_SPEED, 1)
+
 
         self.ground_sprites.update()
         self.ground_sprites.draw(self.screen)
