@@ -17,6 +17,11 @@ class World:
         self.Left_wall = pygame.image.load("jungle-tileset/leftwall.png").convert_alpha()
         self.Right_corner = pygame.image.load("jungle-tileset/rightcorner.png").convert_alpha()
         self.Right_wall = pygame.image.load("jungle-tileset/rightwall.png").convert_alpha()
+        self.flipleft = pygame.image.load("jungle-tileset/90leftflip.png").convert_alpha()
+        self.flipright = pygame.image.load("jungle-tileset/90rightflip.png").convert_alpha()
+        self.left90 = pygame.image.load("jungle-tileset/90left.png").convert_alpha()
+        self.right90 = pygame.image.load("jungle-tileset/90right.png").convert_alpha()
+
 
         self.screen_width = self.screen.get_width()
 
@@ -35,7 +40,7 @@ class World:
 
         print(len(self.maps))
 
-        self.load_tiles(self.maps[random.randint(0,(len(self.maps) - 1))], self.GROUND_SPEED, 0)
+        self.load_tiles("maps/map9.csv", self.GROUND_SPEED, 0)
         self.load_tiles(self.maps[random.randint(0,(len(self.maps) - 1))], self.GROUND_SPEED, 1)
 
 
@@ -88,6 +93,15 @@ class World:
                     self.ground_sprites.add(Tile(self.Right_mud, (x * self.tile_size) + offset, y * self.tile_size, speed))
                 elif tile == '11':
                     self.ground_sprites.add(Tile(self.Right_corner, (x * self.tile_size) + offset, y * self.tile_size, speed))
+                elif tile == '12':
+                    self.ground_sprites.add(Tile(self.flipleft, (x * self.tile_size) + offset, y * self.tile_size, speed))
+                elif tile == '13':
+                    self.ground_sprites.add(Tile(self.flipright, (x * self.tile_size) + offset, y * self.tile_size, speed))
+                elif tile == '14':
+                    self.ground_sprites.add(Tile(self.left90, (x * self.tile_size) + offset, y * self.tile_size, speed))
+                elif tile == '15':
+                    self.ground_sprites.add(Tile(self.right90, (x * self.tile_size) + offset, y * self.tile_size, speed))
+
                 x += 1
             y += 1
         return map_data
