@@ -41,7 +41,7 @@ class World:
 
         print(len(self.maps))
 
-        self.load_tiles("maps/map9.csv", self.GROUND_SPEED, 0)
+        self.load_tiles(self.maps[random.randint(0,(len(self.maps) - 1))], self.GROUND_SPEED, 0)
         self.load_tiles(self.maps[random.randint(0,(len(self.maps) - 1))], self.GROUND_SPEED, 1)
 
 

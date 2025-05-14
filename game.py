@@ -28,15 +28,34 @@ class Game:
             self.background.create_parallax(dt)
             self.calculate_score(dt)
 
+
+
             ground_rects = [tile.rect for tile in self.world.ground_sprites]
-            self.player.movement(ground_rects)
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.run = False
                     return "quit"
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_a:
+                        self.player.LEFT_KEY = True
+                    elif event.key == pygame.K_d:
+                        self.player.RIGHT_KEY = True
+                    elif event.key == pygame.K_SPACE:
+                        self.player.jump()
+                if event.type == pygame.KEYUP:
+                    if event.key == pygame.K_a:
+                        self.player.LEFT_KEY = False
+                    elif event.key == pygame.K_d:
+                        self.player.RIGHT_KEY = False
+                    elif event.key == pygame.K_SPACE:
+                        if self.player.is_jumping:
+                            self.player.velocity.y *= 0.25
+                            self.player.is_jumping = False
 
+            self.player.update(dt, ground_rects)
             self.world.world_run()
+            self.player.draw()
             self.draw_score()
             pygame.display.update()
         return None
