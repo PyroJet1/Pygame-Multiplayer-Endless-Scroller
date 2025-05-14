@@ -1,4 +1,4 @@
-import pygame, csv, os
+import pygame, csv, os, random
 from tile import Tile
 
 class World:
@@ -18,14 +18,20 @@ class World:
         self.Right_corner = pygame.image.load("jungle-tileset/rightcorner.png").convert_alpha()
         self.Right_wall = pygame.image.load("jungle-tileset/rightwall.png").convert_alpha()
 
+        self.screen_width = self.screen.get_width()
+
         self.tile_size = 64
         self.ground_sprites = pygame.sprite.Group()
         self.spawn_x = 0
         self.GROUND_SPEED = 5
+        self.start = 0
         self.start_x = 0
         self.start_y = 0
 
-        self.load_tiles("maps/map7.csv", self.GROUND_SPEED)
+        self.maps = ["maps/map1.csv", "maps/map2.csv", "maps/map3.csv", "maps/map4.csv", "maps/map5.csv", "maps/map6.csv", "maps/map7.csv"]
+
+        self.load_tiles(self.maps[random.randint(0,6)], self.GROUND_SPEED, 0)
+        self.load_tiles(self.maps[random.randint(0,6)], self.GROUND_SPEED, 1)
 
 
     def spawn_ground(self, column_group, spawn_x, speed, screen_height, filename):
@@ -43,41 +49,51 @@ class World:
         # advance spawn_x
         return spawn_x + self.tile_size
 
-    def load_tiles(self, filename, speed):
+    def load_tiles(self, filename, speed, spawn_after):
         map_data = self.read_csv(filename)
+        if spawn_after:
+            offset = self.screen_width - 8
+        else:
+            offset = 0
         x, y = 0, 0
         for row in map_data:
             x = 0
             for tile in row:
                 if tile == '0':
-                    self.ground_sprites.add(Tile(self.Plainmud, x * self.tile_size, y * self.tile_size, speed))
+                    self.ground_sprites.add(Tile(self.Plainmud, (x * self.tile_size) + offset, y * self.tile_size, speed))
                 elif tile == '1':
-                    self.ground_sprites.add(Tile(self.Grass2, x * self.tile_size, y * self.tile_size, speed))
+                    self.ground_sprites.add(Tile(self.Grass2, (x * self.tile_size) + offset, y * self.tile_size, speed))
                 elif tile == '2':
-                    self.ground_sprites.add(Tile(self.Grass, x * self.tile_size, y * self.tile_size, speed))
+                    self.ground_sprites.add(Tile(self.Grass, (x * self.tile_size) + offset, y * self.tile_size, speed))
                 elif tile == '3':
-                    self.ground_sprites.add(Tile(self.Grass3, x * self.tile_size, y * self.tile_size, speed))
+                    self.ground_sprites.add(Tile(self.Grass3, (x * self.tile_size) + offset, y * self.tile_size, speed))
                 elif tile == '4':
-                    self.ground_sprites.add(Tile(self.Left_corner, x * self.tile_size, y * self.tile_size, speed))
+                    self.ground_sprites.add(Tile(self.Left_corner, (x * self.tile_size) + offset, y * self.tile_size, speed))
                 elif tile == '5':
-                    self.ground_sprites.add(Tile(self.Left_wall, x * self.tile_size, y * self.tile_size, speed))
+                    self.ground_sprites.add(Tile(self.Left_wall,(x * self.tile_size) + offset, y * self.tile_size, speed))
                 elif tile == '6':
-                    self.ground_sprites.add(Tile(self.Deep, x * self.tile_size, y * self.tile_size, speed))
+                    self.ground_sprites.add(Tile(self.Deep, (x * self.tile_size) + offset, y * self.tile_size, speed))
                 elif tile == '7':
-                    self.ground_sprites.add(Tile(self.Mud, x * self.tile_size, y * self.tile_size, speed))
+                    self.ground_sprites.add(Tile(self.Mud, (x * self.tile_size) + offset, y * self.tile_size, speed))
                 elif tile == '8':
-                    self.ground_sprites.add(Tile(self.Left_mud, x * self.tile_size, y * self.tile_size, speed))
+                    self.ground_sprites.add(Tile(self.Left_mud, (x * self.tile_size) + offset, y * self.tile_size, speed))
                 elif tile == '9':
-                    self.ground_sprites.add(Tile(self.Right_wall, x * self.tile_size, y * self.tile_size, speed))
+                    self.ground_sprites.add(Tile(self.Right_wall, (x * self.tile_size) + offset, y * self.tile_size, speed))
                 elif tile == '10':
-                    self.ground_sprites.add(Tile(self.Right_mud, x * self.tile_size, y * self.tile_size, speed))
+                    self.ground_sprites.add(Tile(self.Right_mud, (x * self.tile_size) + offset, y * self.tile_size, speed))
                 elif tile == '11':
-                    self.ground_sprites.add(Tile(self.Right_corner, x * self.tile_size, y * self.tile_size, speed))
+                    self.ground_sprites.add(Tile(self.Right_corner, (x * self.tile_size) + offset, y * self.tile_size, speed))
                 x += 1
             y += 1
         return map_data
 
     def world_run(self):
+
+        self.start += self.GROUND_SPEED
+        if self.start > self.screen_width:
+            self.load_tiles(self.maps[random.randint(0,6)], self.GROUND_SPEED, 1)
+            self.start = 0
+
         self.ground_sprites.update()
         self.ground_sprites.draw(self.screen)
 
