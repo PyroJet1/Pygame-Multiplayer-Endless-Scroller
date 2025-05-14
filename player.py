@@ -4,7 +4,7 @@ from spritesheet import Spritesheet
 class Player:
     def __init__(self, screen, player):
         self.screen = screen
-        self.player = pygame.Rect(0, self.screen.get_height() - 105, 63, 105)
+        self.player = pygame.Rect(50, self.screen.get_height() - 105, 63, 105)
 
         # Load and process sprite sheet
         self.sprite_sheet = pygame.image.load(f'sprites/character_animations_sprite_p{player}.png')
@@ -121,35 +121,44 @@ class Player:
 
 
     def get_hits(self, tiles):
-        hits = []
-        for tile in tiles:
-            if self.player.colliderect(tile):
-                hits.append(tile)
-        return hits
+        return [tile for tile in tiles if self.player.colliderect(tile.rect)]
 
-    def check_collisionsx(self, tile):
-        collisions = self.get_hits(tile)
+
+    def check_collisionsx(self, tiles):
+        collisions = self.get_hits(tiles)
         for tile in collisions:
-            if self.velocity.x > 0:
-                self.position.x = tile.left - self.player.w
-                self.player.x = int(self.position.x)
-            elif self.velocity.x < 0:
-                self.position.x = tile.right
-                self.player.x = int(self.position.x)
+            if tile.speed <= 0:
+                continue
+
+            # Calculate overlap direction
+            overlap_left = self.player.right - tile.rect.left
+            overlap_right = tile.rect.right - self.player.left
+
+            # Push player in the direction of smallest overlap
+            if abs(overlap_left) < abs(overlap_right):
+                self.position.x = tile.rect.left - self.player.width
+            else:
+                self.position.x = tile.rect.right
+
+            # Update position and halt horizontal velocity
+            self.player.x = int(self.position.x)
+            self.velocity.x = 0
 
 
-    def check_collisionsy(self, tile):
+    def check_collisionsy(self, tiles):
         self.on_ground = False
-        self.player.bottom += 1
-        collision = self.get_hits(tile)
-        for tile in collision:
-            if self.velocity.y > 0:
+        self.player.bottom += 1  # Small overlap to detect ground
+        collisions = self.get_hits(tiles)
+        for tile in collisions:
+            # Resolve vertical collision regardless of tile speed
+            if self.velocity.y > 0:  # Falling down
                 self.on_ground = True
                 self.is_jumping = False
                 self.velocity.y = 0
-                self.position.y = tile.top
+                self.position.y = tile.rect.top  # Use tile.rect
                 self.player.bottom = int(self.position.y)
-            elif self.velocity.y < 0:
+            elif self.velocity.y < 0:  # Jumping up
                 self.velocity.y = 0
-                self.position.y = tile.bottom + self.player.h
+                self.position.y = tile.rect.bottom + self.player.height
                 self.player.bottom = int(self.position.y)
+        self.player.bottom -= 1  # Reset overlap check

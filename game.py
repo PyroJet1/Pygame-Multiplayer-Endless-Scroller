@@ -29,8 +29,7 @@ class Game:
             self.calculate_score(dt)
 
 
-
-            ground_rects = [tile.rect for tile in self.world.ground_sprites]
+            ground_tiles = self.world.ground_sprites
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -53,7 +52,7 @@ class Game:
                             self.player.velocity.y *= 0.25
                             self.player.is_jumping = False
 
-            self.player.update(dt, ground_rects)
+            self.player.update(dt, ground_tiles)
             self.world.world_run()
             self.player.draw()
             self.draw_score()
