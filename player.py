@@ -43,6 +43,7 @@ class Player:
         self.check_collisionsx(tiles)
         self.vertical_movement(dt)
         self.check_collisionsy(tiles)
+        self.check_game_over()
 
     def draw(self):
         current_time = pygame.time.get_ticks()
@@ -126,10 +127,7 @@ class Player:
                 self.player.bottom = int(self.position.y)
         self.player.bottom -= 1  # Reset overlap check
 
-
-    def game_over(self):
+    def check_game_over(self):
         if self.player.top > self.screen.get_height() or self.player.right < 0:
             self.game_over = True
-
-        if not self.game_over:
-            self.update(self.last_updated, self.animation_list[self.action][self.frame])
+        return self.game_over

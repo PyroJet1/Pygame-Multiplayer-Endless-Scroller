@@ -20,8 +20,11 @@ class Background:
         self.scroll = [0.0, 0.0, 0.0, 0.0, 0.0]
         self.accel = 0.025
         self.bg = [bg1, bg2, bg3, bg4, bg5]
+        self.paused = False
 
     def create_parallax(self, dt):
+        if self.paused:
+            return
         # speed-up each layer by accel% per second
         for i in (1, 2, 3, 4):
             if self.scroll_speed[4] >= 15:
@@ -34,8 +37,6 @@ class Background:
                 self.scroll_speed[1] = 9
             else:
                 self.scroll_speed[i] *= (1 + self.accel * dt)
-
-
 
         # draw backmost layer
         self.screen.blit(self.bg[0], (0, 0))

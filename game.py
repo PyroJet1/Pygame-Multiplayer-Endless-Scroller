@@ -22,12 +22,17 @@ class Game:
        self.start_time = pygame.time.get_ticks()
 
     def run_game(self):
+        self.background.paused = False
         self.clock = pygame.time.Clock()
         while self.run:
             dt = self.clock.tick(self.FPS) / 1000.0
             self.background.create_parallax(dt)
             self.calculate_score(dt)
 
+            # Check game over condition
+            if self.player.check_game_over():
+                self.handle_game_over()
+                break
 
             ground_tiles = self.world.ground_sprites
 
@@ -58,6 +63,70 @@ class Game:
             self.draw_score()
             pygame.display.update()
         return None
+
+    def handle_game_over(self):
+        self.background.paused = True
+        final_time = (pygame.time.get_ticks() - self.start_time) // 1000
+        while True:
+            action = self.show_game_over_screen(self.score, final_time)
+            if action == "restart":
+                self.__init__()  # Reset game state
+                self.run_game()
+                break
+            elif action == "menu":
+                self.run = False
+                break
+            elif action == "quit":
+                pygame.quit()
+                return
+
+    def show_game_over_screen(self, score, time_survived):
+        font_large = pygame.font.SysFont("Arial", 72)
+        font_medium = pygame.font.SysFont("Arial", 48)
+
+        buttons = [
+            {"label": "Play Again", "action": "restart"},
+            {"label": "Main Menu", "action": "menu"}
+        ]
+
+        # Create button surfaces and rects
+        button_rects = []
+        for i, btn in enumerate(buttons):
+            text = font_medium.render(btn["label"], True, (255, 255, 255))
+            rect = text.get_rect(center=(self.SCREEN_WIDTH // 2, 500 + i * 100))
+            btn["rect"] = rect
+            btn["surface"] = text
+
+        while True:
+            # Darken game background
+            overlay = pygame.Surface((self.SCREEN_WIDTH, self.SCREEN_HEIGHT), pygame.SRCALPHA)
+            overlay.fill((0, 0, 0, 200))
+            self.screen.blit(overlay, (0, 0))
+
+            # Display stats
+            score_text = font_large.render(f"Final Score: {int(score)}", True, (255, 255, 255))
+            time_text = font_medium.render(f"Time Survived: {time_survived}s", True, (255, 255, 255))
+
+            self.screen.blit(score_text, score_text.get_rect(center=(self.SCREEN_WIDTH // 2, 300)))
+            self.screen.blit(time_text, time_text.get_rect(center=(self.SCREEN_WIDTH // 2, 380)))
+
+            # Draw buttons
+            for btn in buttons:
+                bg_rect = btn["rect"].inflate(30, 20)
+                pygame.draw.rect(self.screen, (0, 0, 0, 150), bg_rect)
+                self.screen.blit(btn["surface"], btn["rect"])
+
+            pygame.display.update()
+
+            # Event handling
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    return "quit"
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    for btn in buttons:
+                        if btn["rect"].collidepoint(event.pos):
+                            return btn["action"]
 
     def calculate_score(self, dt):
         # Time survived component (10 points/sec)

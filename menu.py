@@ -5,6 +5,7 @@ def run_menu():
     game = Game()
 
     while True:
+        game = Game()
         selection = game.run_game_menu()
 
         if selection == "solo":
