@@ -59,7 +59,7 @@ class Player:
     def horizontal_movement(self, dt):
         self.acceleration.x = 0
         if self.LEFT_KEY:
-            self.acceleration.x -= 3000
+            self.acceleration.x -= 7500
         elif self.RIGHT_KEY:
             self.acceleration.x += 3000
         self.acceleration.x += self.velocity.x * self.friction
@@ -75,8 +75,6 @@ class Player:
     def vertical_movement(self, dt):
         self.velocity.y += self.acceleration.y * dt
         self.position.y += self.velocity.y * dt + (self.acceleration.y * .5) * (dt * dt)
-
-
         self.player.bottom = self.position.y
 
     def jump(self):
@@ -84,41 +82,6 @@ class Player:
             self.is_jumping = True
             self.velocity.y = self.jump_strength
             self.on_ground = False
-
-
-    # def movement(self, ground_segments):
-        # keys = pygame.key.get_pressed()
-        #
-        # # Horizontal movement
-        # if keys[pygame.K_a]:
-        #     self.player
-        # elif keys[pygame.K_d]:
-        #     self.player.x += self.speed
-        #
-        # # Jump if on the ground
-        # if keys[pygame.K_SPACE] and not self.is_jumping:
-        #     self.velocity_y = self.jump_strength
-        #     self.is_jumping = True
-        #
-        # # Apply gravity
-        # self.velocity_y += self.gravity
-        # self.player.y += self.velocity_y
-        #
-        # # Check for collision with ground segments
-        # on_ground = False
-        # for segment in ground_segments:
-        #     if self.player.colliderect(segment) and self.velocity_y >= 0:
-        #         self.player.bottom = segment.top
-        #         self.velocity_y = 0
-        #         self.is_jumping = False
-        #         on_ground = True
-        #         break
-        #
-        # # if not on_ground:
-        #     self.is_jumping = True
-
-        # Update animation frame
-
 
     def get_hits(self, tiles):
         return [tile for tile in tiles if self.player.colliderect(tile.rect)]
