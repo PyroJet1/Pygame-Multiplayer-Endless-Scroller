@@ -25,7 +25,7 @@ class World:
         self.start_x = 0
         self.start_y = 0
 
-        self.load_tiles("maps/map1.csv", self.GROUND_SPEED)
+        self.load_tiles("maps/map7.csv", self.GROUND_SPEED)
 
 
     def spawn_ground(self, column_group, spawn_x, speed, screen_height, filename):
