@@ -21,6 +21,7 @@ class World:
         self.flipright = pygame.image.load("jungle-tileset/90rightflip.png").convert_alpha()
         self.left90 = pygame.image.load("jungle-tileset/90left.png").convert_alpha()
         self.right90 = pygame.image.load("jungle-tileset/90right.png").convert_alpha()
+        self.grassblock = pygame.image.load("jungle-tileset/Grassblock.png").convert_alpha()
 
 
         self.screen_width = self.screen.get_width()
@@ -101,6 +102,8 @@ class World:
                     self.ground_sprites.add(Tile(self.left90, (x * self.tile_size) + offset, y * self.tile_size, speed))
                 elif tile == '15':
                     self.ground_sprites.add(Tile(self.right90, (x * self.tile_size) + offset, y * self.tile_size, speed))
+                elif tile == '15':
+                    self.ground_sprites.add(Tile(self.grassblock, (x * self.tile_size) + offset, y * self.tile_size, speed))
 
                 x += 1
             y += 1
