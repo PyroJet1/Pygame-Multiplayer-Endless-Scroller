@@ -102,7 +102,7 @@ class World:
                     self.ground_sprites.add(Tile(self.left90, (x * self.tile_size) + offset, y * self.tile_size, speed))
                 elif tile == '15':
                     self.ground_sprites.add(Tile(self.right90, (x * self.tile_size) + offset, y * self.tile_size, speed))
-                elif tile == '15':
+                elif tile == '16':
                     self.ground_sprites.add(Tile(self.grassblock, (x * self.tile_size) + offset, y * self.tile_size, speed))
 
                 x += 1
