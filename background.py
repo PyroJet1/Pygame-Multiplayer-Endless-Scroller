@@ -18,7 +18,7 @@ class Background:
         bg5 = pygame.transform.scale(bg5, (self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
         self.scroll_speed = [0.0, 0.25, 0.5, 0.75, 1.0]
         self.scroll = [0.0, 0.0, 0.0, 0.0, 0.0]
-        self.accel = 0.001
+        self.accel = 0.1
         self.bg = [bg1, bg2, bg3, bg4, bg5]
 
     def create_parallax(self, dt):

@@ -28,7 +28,7 @@ class Player:
 
         # Movement and physics
         self.speed = 5
-        self.gravity, self.friction = 3000, -15
+        self.gravity, self.friction = 2700, -15
         self.jump_strength = -1200
         self.velocity_y = 0
         self.LEFT_KEY, self.RIGHT_KEY = False, False

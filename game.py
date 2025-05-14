@@ -40,14 +40,14 @@ class Game:
                         self.player.LEFT_KEY = True
                     elif event.key == pygame.K_d:
                         self.player.RIGHT_KEY = True
-                    elif event.key == pygame.K_SPACE:
+                    if event.key == pygame.K_SPACE:
                         self.player.jump()
                 if event.type == pygame.KEYUP:
                     if event.key == pygame.K_a:
                         self.player.LEFT_KEY = False
                     elif event.key == pygame.K_d:
                         self.player.RIGHT_KEY = False
-                    elif event.key == pygame.K_SPACE:
+                    if event.key == pygame.K_SPACE:
                         if self.player.is_jumping:
                             self.player.velocity.y *= 0.25
                             self.player.is_jumping = False
