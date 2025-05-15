@@ -16,6 +16,8 @@ class Game:
        pygame.display.set_caption("GAME NAME GOES HERE")
        self.background = Background(screen)
        self.player = Player(screen, 1)
+       self.player2 = Player(screen, 2)
+       self.player3 = Player(screen, 3)
        self.world = World(screen)
        self.score = 0.0
        self.font = pygame.font.SysFont("Arial", 36)
@@ -59,8 +61,12 @@ class Game:
                             self.player.is_jumping = False
 
             self.player.update(dt, ground_tiles)
+            self.player2.update(dt, ground_tiles)
+            self.player3.update(dt, ground_tiles)
             self.world.world_run()
             self.player.draw()
+            self.player2.update(dt, ground_tiles)
+            self.player3.update(dt, ground_tiles)
             self.draw_score()
             pygame.display.update()
         return None

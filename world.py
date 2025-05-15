@@ -29,7 +29,7 @@ class World:
         self.tile_size = 64
         self.ground_sprites = pygame.sprite.Group()
         self.spawn_x = 0
-        self.GROUND_SPEED = 5
+        self.GROUND_SPEED = 8
         self.start = 0
         self.start_x = 0
         self.start_y = 0
@@ -39,7 +39,6 @@ class World:
         for path in os.listdir("maps"):
             self.maps.append(os.path.join("maps", path))
 
-        print(len(self.maps))
 
         self.load_tiles("starting_map.csv", self.GROUND_SPEED, 0)
         self.load_tiles(self.maps[random.randint(0,(len(self.maps) - 1))], self.GROUND_SPEED, 1)

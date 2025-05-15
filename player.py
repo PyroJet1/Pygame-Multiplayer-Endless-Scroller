@@ -4,7 +4,7 @@ from spritesheet import Spritesheet
 class Player:
     def __init__(self, screen, player):
         self.screen = screen
-        self.player = pygame.Rect(50, self.screen.get_height() - 105, 63, 105)
+        self.player = pygame.Rect(200 - (20 * player), self.screen.get_height() - 105, 63, 105)
 
         # Load and process sprite sheet
         self.sprite_sheet = pygame.image.load(f'sprites/character_animations_sprite_p{player}.png')
@@ -29,8 +29,8 @@ class Player:
 
         # Movement and physics
         self.speed = 5
-        self.gravity, self.friction = 2300, -15
-        self.jump_strength = -1000
+        self.gravity, self.friction = 2400, -15
+        self.jump_strength = -1100
         self.velocity_y = 0
         self.LEFT_KEY, self.RIGHT_KEY = False, False
         self.is_jumping, self.on_ground = False, False
@@ -56,7 +56,6 @@ class Player:
         # Draw the animated sprite at the player's current position
         image = self.animation_list[self.action][self.frame]
         self.screen.blit(image, self.player.topleft)
-        pygame.draw.rect(self.screen, (255, 255, 255), self.player, 2)
 
     def horizontal_movement(self, dt):
         self.acceleration.x = 0
