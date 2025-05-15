@@ -4,7 +4,7 @@ from player import Player
 from world import World
 
 class Game:
-    def __init__(self):
+    def __init__(self, num_players = 1):
        self.SCREEN_WIDTH = 1920
        self.SCREEN_HEIGHT = 1080
        self.clock = 0
@@ -22,52 +22,82 @@ class Game:
        self.score = 0.0
        self.font = pygame.font.SysFont("Arial", 36)
        self.start_time = pygame.time.get_ticks()
+       self.num_players = num_players
+       self.players = []
+
+       for i in range(4):
+           player = Player(self.screen, i+1)
+           player.active = (i < num_players)
+           self.players.append(player)
 
     def run_game(self):
         self.background.paused = False
         self.clock = pygame.time.Clock()
+
         while self.run:
             dt = self.clock.tick(self.FPS) / 1000.0
             self.background.create_parallax(dt)
-            self.calculate_score(dt)
+            ground_tiles = self.world.ground_sprites
 
-            # Check game over condition
-            if self.player.check_game_over():
+            # Check game over for active players
+            if any(p.check_game_over() for p in self.players if p.active):
                 if self.handle_game_over():
                     return "quit"
                 break
 
-            ground_tiles = self.world.ground_sprites
-
+            # Event handling for active players
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.run = False
                     return "quit"
+
+                # Player 1 controls (WASD) - Always active if num_players >= 1
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_a:
-                        self.player.LEFT_KEY = True
+                        self.players[0].LEFT_KEY = True
                     elif event.key == pygame.K_d:
-                        self.player.RIGHT_KEY = True
-                    if event.key == pygame.K_SPACE:
-                        self.player.jump()
+                        self.players[0].RIGHT_KEY = True
+                    if event.key == pygame.K_w:
+                        self.players[0].jump()
+                    if event.key == pygame.K_RIGHT:
+                        self.players[1].RIGHT_KEY = True
+                    elif event.key == pygame.K_LEFT:
+                        self.players[1].LEFT_KEY = True
+                    if event.key == pygame.K_UP:
+                        self.players[1].jump()
+
                 if event.type == pygame.KEYUP:
                     if event.key == pygame.K_a:
-                        self.player.LEFT_KEY = False
+                        self.players[0].LEFT_KEY = False
                     elif event.key == pygame.K_d:
-                        self.player.RIGHT_KEY = False
-                    if event.key == pygame.K_SPACE:
-                        if self.player.is_jumping:
-                            self.player.velocity.y *= 0.25
-                            self.player.is_jumping = False
+                        self.players[0].RIGHT_KEY = False
+                    if event.key == pygame.K_RIGHT:
+                        self.players[1].RIGHT_KEY = False
+                    elif event.key == pygame.K_LEFT:
+                        self.players[1].LEFT_KEY = False
 
-            self.player.update(dt, ground_tiles)
-            self.player2.update(dt, ground_tiles)
-            self.player3.update(dt, ground_tiles)
+                # Player 2 controls arrow keys
+
+
+            # Update all players (active and inactive)
+            for player in self.players:
+                if player.active:
+                    player.update(dt, ground_tiles, self.players)
+                else:
+                    # Keep inactive players in place for collision testing
+                    player.player.y = self.screen.get_height() - 105  # Ground level
+
             self.world.world_run()
-            self.player.draw()
-            self.player2.update(dt, ground_tiles)
-            self.player3.update(dt, ground_tiles)
             self.draw_score()
+
+            # Draw all players
+            for player in self.players:
+                if player.active:
+                    player.draw()
+                else:
+                    # Draw inactive players in gray
+                    pygame.draw.rect(self.screen, (100, 100, 100), player.player)
+
             pygame.display.update()
         return None
 
@@ -246,13 +276,22 @@ class Game:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
-                    return None
+                    return "quit"
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     for button in buttons:
                         if button["rect"].collidepoint(event.pos):
-                            if button["value"] == "back":
-                                return None  # go back to main menu
-                            return button["value"]
+                            selected_value = button["value"]
+                            if selected_value == "back":
+                                return None  # Return to main menu
+                            elif selected_value in [2, 3, 4]:
+                                # Start game with selected player count
+                                multiplayer_game = Game(num_players=selected_value)
+                                result = multiplayer_game.run_game()
+                                # If game returns "quit", propagate it
+                                if result == "quit":
+                                    return "quit"
+                                # Otherwise show multiplayer menu again
+                                break  # Breaks out of button loop, stays in menu loop
 
             pygame.display.update()
         return None
