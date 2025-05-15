@@ -59,7 +59,7 @@ class Game:
                             self.player.is_jumping = False
 
             self.player.update(dt, ground_tiles)
-            self.world.world_run()
+            self.world.world_run(dt)
             self.player.draw()
             self.draw_score()
             pygame.display.update()
