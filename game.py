@@ -15,9 +15,6 @@ class Game:
        self.screen = screen
        pygame.display.set_caption("GAME NAME GOES HERE")
        self.background = Background(screen)
-       self.player = Player(screen, 1)
-       self.player2 = Player(screen, 2)
-       self.player3 = Player(screen, 3)
        self.world = World(screen)
        self.score = 0.0
        self.font = pygame.font.SysFont("Arial", 36)
@@ -25,9 +22,8 @@ class Game:
        self.num_players = num_players
        self.players = []
 
-       for i in range(4):
-           player = Player(self.screen, i+1)
-           player.active = (i < num_players)
+       for i in range(num_players):  # Only create `num_players` instances
+           player = Player(self.screen, i + 1)
            self.players.append(player)
 
     def run_game(self):
@@ -40,7 +36,7 @@ class Game:
             ground_tiles = self.world.ground_sprites
 
             # Check game over for active players
-            if any(p.check_game_over() for p in self.players if p.active):
+            if any(player.check_game_over() for player in self.players):
                 if self.handle_game_over():
                     return "quit"
                 break
@@ -78,25 +74,13 @@ class Game:
 
                 # Player 2 controls arrow keys
 
-
-            # Update all players (active and inactive)
+            # Update existing players only, draw the existing ones only as well
             for player in self.players:
-                if player.active:
-                    player.update(dt, ground_tiles, self.players)
-                else:
-                    # Keep inactive players in place for collision testing
-                    player.player.y = self.screen.get_height() - 105  # Ground level
+                player.update(dt, ground_tiles, self.players)
+                player.draw()
 
             self.world.world_run()
             self.draw_score()
-
-            # Draw all players
-            for player in self.players:
-                if player.active:
-                    player.draw()
-                else:
-                    # Draw inactive players in gray
-                    pygame.draw.rect(self.screen, (100, 100, 100), player.player)
 
             pygame.display.update()
         return None

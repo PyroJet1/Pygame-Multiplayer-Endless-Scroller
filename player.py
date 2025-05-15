@@ -5,9 +5,10 @@ class Player:
     def __init__(self, screen, player_num):
         self.screen = screen
         self.active = False
-        x_position = 200 + (player_num * 150)  # Space players horizontally
+
+        # Single position assignment
+        x_position = 200 + ((player_num - 1) * 200)
         self.player = pygame.Rect(x_position, screen.get_height() - 105, 63, 105)
-        self.player = pygame.Rect(200 - (20 * player_num), self.screen.get_height() - 105, 63, 105)
 
         # Load and process sprite sheet
         self.sprite_sheet = pygame.image.load(f'sprites/character_animations_sprite_p{player_num}.png')
