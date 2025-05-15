@@ -31,7 +31,8 @@ class Game:
 
             # Check game over condition
             if self.player.check_game_over():
-                self.handle_game_over()
+                if self.handle_game_over():
+                    return "quit"
                 break
 
             ground_tiles = self.world.ground_sprites
@@ -78,7 +79,8 @@ class Game:
                 break
             elif action == "quit":
                 pygame.quit()
-                return
+                return True
+            return False
 
     def show_game_over_screen(self, score, time_survived):
         font_large = pygame.font.SysFont("Arial", 72)

@@ -9,7 +9,9 @@ def run_menu():
         selection = game.run_game_menu()
 
         if selection == "solo":
-            game.run_game()
+            result = game.run_game()
+            if result == "quit":
+                return False
 
         elif selection == "multiplayer":
             num_players = game.run_multiplayer_menu()

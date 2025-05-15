@@ -4,12 +4,15 @@ from game import Game
 
 def main() -> None:
     pygame.init()
-
     should_continue = run_menu()
 
     if should_continue:
         game = Game()
-        game.run_game()
+        result = game.run_game()
+
+        if result == "quit":
+            pygame.quit()
+            return
 
     pygame.quit()
 
