@@ -2,12 +2,15 @@ import pygame
 from spritesheet import Spritesheet
 
 class Player:
-    def __init__(self, screen, player):
+    def __init__(self, screen, player_num):
         self.screen = screen
-        self.player = pygame.Rect(200 - (20 * player), self.screen.get_height() - 105, 63, 105)
+        self.active = False
+        x_position = 200 + (player_num * 150)  # Space players horizontally
+        self.player = pygame.Rect(x_position, screen.get_height() - 105, 63, 105)
+        self.player = pygame.Rect(200 - (20 * player_num), self.screen.get_height() - 105, 63, 105)
 
         # Load and process sprite sheet
-        self.sprite_sheet = pygame.image.load(f'sprites/character_animations_sprite_p{player}.png')
+        self.sprite_sheet = pygame.image.load(f'sprites/character_animations_sprite_p{player_num}.png')
         self.sheet = Spritesheet(self.sprite_sheet)
         self.animation_steps = [8,1,2,1]
         self.animation_list = []
@@ -19,6 +22,8 @@ class Player:
         self.animation_cooldown = 100
         self.last_updated = pygame.time.get_ticks()
         self.game_over = False
+        self.on_player = False
+        self.boost_multiplier = 1.5
 
         for animation in self.animation_steps:
             temp_img_list = []
@@ -38,12 +43,31 @@ class Player:
         self.acceleration = pygame.math.Vector2(0,self.gravity)
         self.ground_y = self.screen.get_height() - self.player.height
 
-    def update(self, dt, tiles):
+    def update(self, dt, tiles, players=None):
         self.horizontal_movement(dt)
-        self.check_collisionsx(tiles)
+        self.check_collisionsx(tiles, players)
         self.vertical_movement(dt)
-        self.check_collisionsy(tiles)
+        self.check_collisionsy(tiles, players)
         self.check_game_over()
+
+        # Collision with other players (active and inactive)
+        if players:
+            for other in players:
+                if other is not self and self.player.colliderect(other.player):
+                    self.handle_player_collision(other)
+
+    def handle_player_collision(self, other):
+        # Simple collision resolution
+        if self.velocity.x > other.velocity.x:
+            self.position.x -= 5
+            other.position.x += 5
+        else:
+            self.position.x += 5
+            other.position.x -= 5
+
+        # Update rect positions
+        self.player.x = int(self.position.x)
+        other.player.x = int(other.position.x)
 
     def draw(self):
         current_time = pygame.time.get_ticks()
@@ -83,16 +107,15 @@ class Player:
             self.is_jumping = True
             self.velocity.y = self.jump_strength
             self.on_ground = False
+            self.on_player = False
 
     def get_hits(self, tiles):
         return [tile for tile in tiles if self.player.colliderect(tile.rect)]
 
 
-    def check_collisionsx(self, tiles):
+    def check_collisionsx(self, tiles, players=None):
         collisions = self.get_hits(tiles)
         for tile in collisions:
-            if tile.speed <= 0:
-                continue
 
             # Calculate overlap direction
             overlap_left = self.player.right - tile.rect.left
@@ -108,8 +131,9 @@ class Player:
             self.player.x = int(self.position.x)
             self.velocity.x = 0
 
-    def check_collisionsy(self, tiles):
+    def check_collisionsy(self, tiles, players=None):
         self.on_ground = False
+        self.on_player = False
         self.player.bottom += 1  # Small overlap to detect ground
         collisions = self.get_hits(tiles)
         for tile in collisions:
