@@ -1,11 +1,10 @@
-import pygame, time
+import pygame
 from background import Background
 from player import Player
 from world import World
-from network import Network
 
 class Game:
-    def __init__(self, num_players = 1, is_multiplayer = False):
+    def __init__(self, num_players = 1):
        self.SCREEN_WIDTH = 1920
        self.SCREEN_HEIGHT = 1080
        self.clock = 0
@@ -23,20 +22,8 @@ class Game:
        self.num_players = num_players
        self.players = []
 
-       self.is_multiplayer = is_multiplayer
-
-       if hasattr(self, 'network') and self.network is not None:
-           self.network.close()
-       if self.is_multiplayer:
-           self.network = Network(self)
-       else:
-           self.network = None
-
-
-
-       for i in range(4):
-           player = Player(self.screen, i+1, self)
-           player.active = (i < num_players)
+       for i in range(num_players):  # Only create `num_players` instances
+           player = Player(self.screen, i + 1)
            self.players.append(player)
 
     def run_game(self):
@@ -49,7 +36,7 @@ class Game:
             ground_tiles = self.world.ground_sprites
 
             # Check game over for active players
-            if any(p.check_game_over() for p in self.players if p.active):
+            if any(player.check_game_over() for player in self.players):
                 if self.handle_game_over():
                     return "quit"
                 break
@@ -68,35 +55,32 @@ class Game:
                         self.players[0].RIGHT_KEY = True
                     if event.key == pygame.K_w:
                         self.players[0].jump()
-
+                    if event.key == pygame.K_RIGHT:
+                        self.players[1].RIGHT_KEY = True
+                    elif event.key == pygame.K_LEFT:
+                        self.players[1].LEFT_KEY = True
+                    if event.key == pygame.K_UP:
+                        self.players[1].jump()
 
                 if event.type == pygame.KEYUP:
                     if event.key == pygame.K_a:
                         self.players[0].LEFT_KEY = False
                     elif event.key == pygame.K_d:
                         self.players[0].RIGHT_KEY = False
+                    if event.key == pygame.K_RIGHT:
+                        self.players[1].RIGHT_KEY = False
+                    elif event.key == pygame.K_LEFT:
+                        self.players[1].LEFT_KEY = False
 
+                # Player 2 controls arrow keys
 
-
-
-
-            # Update all players (active and inactive)
+            # Update existing players only, draw the existing ones only as well
             for player in self.players:
-                if player.active:
-                    player.update(dt, ground_tiles, self.players)
-                else:
-                    # Keep inactive players in place for collision testing
-                    player.player.y = self.screen.get_height() - 105  # Ground level
+                player.update(dt, ground_tiles, self.players)
+                player.draw()
 
             self.world.world_run()
             self.draw_score()
-
-            # Draw all players
-            for player in self.players:
-                if player.active or (self.is_multiplayer and not player.active):
-                    player.draw()
-                else:
-                    pygame.draw.rect(self.screen, (100, 100, 100), player.player)
 
             pygame.display.update()
         return None
@@ -284,48 +268,14 @@ class Game:
                             if selected_value == "back":
                                 return None  # Return to main menu
                             elif selected_value in [2, 3, 4]:
-                                return selected_value
+                                # Start game with selected player count
+                                multiplayer_game = Game(num_players=selected_value)
+                                result = multiplayer_game.run_game()
+                                # If game returns "quit", propagate it
+                                if result == "quit":
+                                    return "quit"
+                                # Otherwise show multiplayer menu again
+                                break  # Breaks out of button loop, stays in menu loop
 
             pygame.display.update()
         return None
-
-    def update_online_player(self, player_num, x, y):
-        index = player_num - 1
-        if 0 <= index < len(self.players) and not self.players[index].active:
-            self.players[index].player.x = x
-            self.players[index].player.y = y
-
-    def show_loading_screen(self):
-        font = pygame.font.SysFont("Arial", 48)
-        loading_text = font.render("Searching for players...", True, (255, 255, 255))
-        text_rect = loading_text.get_rect(center=(self.SCREEN_WIDTH // 2, self.SCREEN_HEIGHT // 2))
-        start_time = time.time()
-
-        while self.run:
-            self.background.create_parallax(0.0001)
-            self.screen.blit(loading_text, text_rect)
-            pygame.display.update()
-
-            if time.time() - start_time > 15:
-                print("[NETWORK] Discovery Timeout")
-
-            # Check if peers are found or timeout
-            if len(self.network.game_players) > 0:
-                print(f"[NETWORK] Found players: {self.network.game_players}")
-                return True  # Start game
-
-            # Event handling to prevent freeze
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    return False
-            pygame.time.wait(100)
-        return None
-
-
-
-
-
-
-
-

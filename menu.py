@@ -14,12 +14,10 @@ def run_menu():
                 return False
 
         elif selection == "multiplayer":
-            num_players = game.run_multiplayer_menu()  # Handle menu in multiplayer context
+            num_players = game.run_multiplayer_menu()
             if num_players in [2, 3, 4]:
-                game.__init__(num_players=num_players, is_multiplayer=True)
-                game.network.broadcast(timeout=10)
-                if game.show_loading_screen():
-                    game.run_game()
+                print(f"Multiplayer selected with {num_players} players")
+                # Multiplayer logic here
 
         elif selection == "quit" or selection is None:
             return False  # Tell main not to start game

@@ -1,16 +1,14 @@
 import pygame
 from spritesheet import Spritesheet
-from network import Network
 
 class Player:
-    def __init__(self, screen, player_num,game):
+    def __init__(self, screen, player_num):
         self.screen = screen
         self.active = False
-        x_position = 200 + (player_num * 150)  # Space players horizontally
+
+        # Single position assignment
+        x_position = 200 + ((player_num - 1) * 200)
         self.player = pygame.Rect(x_position, screen.get_height() - 105, 63, 105)
-        self.player = pygame.Rect(200 - (20 * player_num), self.screen.get_height() - 105, 63, 105)
-        self.player_num = player_num
-        self.game = game
 
         # Load and process sprite sheet
         self.sprite_sheet = pygame.image.load(f'sprites/character_animations_sprite_p{player_num}.png')
@@ -46,15 +44,12 @@ class Player:
         self.acceleration = pygame.math.Vector2(0,self.gravity)
         self.ground_y = self.screen.get_height() - self.player.height
 
-        self.network = Network(self.game)
-
     def update(self, dt, tiles, players=None):
         self.horizontal_movement(dt)
         self.check_collisionsx(tiles, players)
         self.vertical_movement(dt)
         self.check_collisionsy(tiles, players)
         self.check_game_over()
-        self.send_coordinates()
 
         # Collision with other players (active and inactive)
         if players:
@@ -160,15 +155,3 @@ class Player:
         if self.player.top > self.screen.get_height() or self.player.right < 0:
             self.game_over = True
         return self.game_over
-
-    def send_coordinates(self):
-        if self.active and self.game.is_multiplayer:
-            self.game.network.send_position(self.player_num, self.player.x, self.player.y)
-
-
-
-
-
-
-
-
