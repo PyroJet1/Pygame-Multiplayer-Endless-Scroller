@@ -29,9 +29,15 @@ class Game:
            self.network.close()
        if self.is_multiplayer:
            self.network = Network(self)
+           player = Player(self.screen, 1, self)  # Assuming player_num starts at 1
+           self.players.append(player)
+           self.num_players = num_players
 
        else:
            self.network = None
+           for i in range(num_players):
+               player = Player(self.screen, i + 1, self)
+               self.players.append(player)
 
        for i in range(num_players):  # Only create `num_players` instances
            player = Player(self.screen, i + 1, self)
@@ -305,6 +311,7 @@ class Game:
         loading_text = font.render("Searching for players...", True, (255, 255, 255))
         text_rect = loading_text.get_rect(center=(self.SCREEN_WIDTH // 2, self.SCREEN_HEIGHT // 2))
         start_time = time.time()
+        required_players = self.num_players - 1
 
         if self.is_multiplayer:
             self.network.broadcast()
@@ -318,9 +325,10 @@ class Game:
                 print("[NETWORK] Discovery Timeout")
 
             # Check if peers are found or timeout
-            if len(self.network.game_players) > 0:
+            if len(self.network.game_players) >= required_players:
                 print(f"[NETWORK] Found players: {self.network.game_players}")
-                return True  # Start game
+                # Add remote players here if necessary
+                return True
 
             # Event handling to prevent freeze
             for event in pygame.event.get():
@@ -329,3 +337,11 @@ class Game:
                     return False
             pygame.time.wait(100)
         return None
+
+    def add_remote_player(self, addr):
+        # Assign a unique player_num based on existing players
+        player_num = len(self.players) + 1
+        if player_num > self.num_players:
+            return  # Exceeds expected players
+        remote_player = RemotePlayer(self.screen, player_num, self, addr)
+        self.players.append(remote_player)

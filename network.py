@@ -47,6 +47,7 @@ class Network:
                     print(f"[NETWORK] Received HELLO from {addr}")
                     if addr not in self.game_players:
                         self.game_players.append(addr)
+                        self.game.add_remote_player(addr)  # You'll need to implement this method
 
             except Exception as e:
                 print(f"ERROR-IN-RECEIVE: {e}")
