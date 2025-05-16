@@ -31,12 +31,11 @@ class Network:
                 data, addr = self.sock.recvfrom(1024) #recvfrom UDP method addr returns a tuple (ip, port)
                 data = data.decode()
 
-                if addr[0] == self.local_ip:
-                    continue
+
 
                 if data == "DISCOVER":
                     print(f"[NETWORK] Sending HELLO to {addr[0]}:{self.port}")
-                    self.sock.sendto("HELLO".encode(), (addr[0], self.port))
+                    self.sock.sendto(f"HELLO {addr[0]}".encode(), (addr[0], self.port))
                 elif data.startswith("POSITION"):
                     parts = data.split(":")
                     subparts = parts[1].split(",")
@@ -46,10 +45,11 @@ class Network:
                     self.game.update_online_player(player_num, x, y)
                 elif data.startswith("HEARTBEAT"):
                     self.players_last_online[addr] = time.time()
-                elif data == "HELLO":
+                elif data.startswith("HELLO"):
                     print(f"[NETWORK] Received HELLO from {addr}")
                     if addr not in self.game_players:
                         self.game_players.append(addr)
+
             except Exception as e:
                 print(f"ERROR-IN-RECEIVE: {e}")
 
@@ -63,7 +63,7 @@ class Network:
     def broadcast_loop(self, timeout):
         end_time = time.time() + timeout
         while time.time() < end_time and self.discovery_running:
-            self.sock.sendto("DISCOVER".encode(), ("255.255.255.255", self.port))
+            self.sock.sendto("DISCOVER".encode(), ("172.20.10.3", self.port))
             time.sleep(1)
         print(f"[NETWORK] Found {len(self.game_players)} players")
 
