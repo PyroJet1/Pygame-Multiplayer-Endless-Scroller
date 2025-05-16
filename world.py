@@ -29,7 +29,7 @@ class World:
         self.tile_size = 64
         self.ground_sprites = pygame.sprite.Group()
         self.spawn_x = 0
-        self.GROUND_SPEED = 4
+        self.GROUND_SPEED = 0
         self.start = 0
         self.start_x = 0
         self.start_y = 0
