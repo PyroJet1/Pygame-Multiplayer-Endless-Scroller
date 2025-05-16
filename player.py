@@ -24,7 +24,9 @@ class Player:
         self.last_updated = pygame.time.get_ticks()
         self.game_over = False
         self.on_player = False
-        self.boost_multiplier = 1.5
+        self.score = 0.0
+        self.colors = [(108,196,156), (252,4,4), (108,148,196), (132,4,132)]
+        self.color = self.colors[player_num-1]
 
         for animation in self.animation_steps:
             temp_img_list = []

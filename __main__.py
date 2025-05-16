@@ -1,4 +1,5 @@
 import pygame
+import sys
 from menu import run_menu
 from game import Game
 
@@ -9,10 +10,6 @@ def main() -> None:
     if should_continue:
         game = Game()
         result = game.run_game()
-
-        if result == "quit":
-            pygame.quit()
-            return
 
     pygame.quit()
 

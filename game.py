@@ -1,16 +1,17 @@
 import pygame
+import sys
 from background import Background
 from player import Player
 from world import World
 
 class Game:
     def __init__(self, num_players = 1):
+       self.player = None
        self.SCREEN_WIDTH = 1920
        self.SCREEN_HEIGHT = 1080
        self.clock = 0
        self.FPS = 60
        self.run = True
-       pygame.init()
        screen = pygame.display.set_mode((self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
        self.screen = screen
        pygame.display.set_caption("GAME NAME GOES HERE")
@@ -33,13 +34,13 @@ class Game:
         while self.run:
             dt = self.clock.tick(self.FPS) / 1000.0
             self.background.create_parallax(dt)
+            self.calculate_score(dt)
             ground_tiles = self.world.ground_sprites
 
             # Check game over for active players
-            if any(player.check_game_over() for player in self.players):
+            if all(player.check_game_over() for player in self.players):
                 if self.handle_game_over():
                     return "quit"
-                break
 
             # Event handling for active players
             for event in pygame.event.get():
@@ -87,50 +88,60 @@ class Game:
 
     def handle_game_over(self):
         self.background.paused = True
-        final_time = (pygame.time.get_ticks() - self.start_time) // 1000
+        stored_players = self.num_players # stores player count
         while True:
-            action = self.show_game_over_screen(self.score, final_time)
+            action = self.show_game_over_screen()
             if action == "restart":
-                self.__init__()  # Reset game state
+                self.__init__(num_players=stored_players)  # Reset game state
                 self.run_game()
                 break
             elif action == "menu":
                 self.run = False
                 break
             elif action == "quit":
-                pygame.quit()
                 return True
             return False
 
-    def show_game_over_screen(self, score, time_survived):
+    def show_game_over_screen(self):
+        # Initialize fonts
         font_large = pygame.font.SysFont("Arial", 72)
         font_medium = pygame.font.SysFont("Arial", 48)
+
+        # Calculate winner
+        winner = max(self.players, key=lambda player: player.score)
 
         buttons = [
             {"label": "Play Again", "action": "restart"},
             {"label": "Main Menu", "action": "menu"}
         ]
 
-        # Create button surfaces and rects
-        button_rects = []
+        # Create button surfaces
         for i, btn in enumerate(buttons):
             text = font_medium.render(btn["label"], True, (255, 255, 255))
-            rect = text.get_rect(center=(self.SCREEN_WIDTH // 2, 500 + i * 100))
-            btn["rect"] = rect
+            rect = text.get_rect(center=(self.SCREEN_WIDTH // 2, 800 + i * 100))
             btn["surface"] = text
+            btn["rect"] = rect
 
         while True:
-            # Darken game background
+            # Dark overlay
             overlay = pygame.Surface((self.SCREEN_WIDTH, self.SCREEN_HEIGHT), pygame.SRCALPHA)
             overlay.fill((0, 0, 0, 200))
             self.screen.blit(overlay, (0, 0))
 
-            # Display stats
-            score_text = font_large.render(f"Final Score: {int(score)}", True, (255, 255, 255))
-            time_text = font_medium.render(f"Time Survived: {time_survived}s", True, (255, 255, 255))
+            # Winner text
+            winner_text = font_large.render(f"PLAYER {self.players.index(winner) + 1} WINS!", True, winner.color)
+            self.screen.blit(winner_text, winner_text.get_rect(center=(self.SCREEN_WIDTH // 2, 300)))
 
-            self.screen.blit(score_text, score_text.get_rect(center=(self.SCREEN_WIDTH // 2, 300)))
-            self.screen.blit(time_text, time_text.get_rect(center=(self.SCREEN_WIDTH // 2, 380)))
+            # Player scores
+            y_pos = 400
+            for i, player in enumerate(self.players):
+                score_text = font_medium.render(
+                    f"Player {i + 1}: {int(player.score)}",
+                    True,
+                    player.color if player.check_game_over() else (150, 150, 150)  # Gray out dead players
+                )
+                self.screen.blit(score_text, score_text.get_rect(center=(self.SCREEN_WIDTH // 2, y_pos)))
+                y_pos += 100
 
             # Draw buttons
             for btn in buttons:
@@ -143,7 +154,6 @@ class Game:
             # Event handling
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    pygame.quit()
                     return "quit"
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     for btn in buttons:
@@ -151,33 +161,36 @@ class Game:
                             return btn["action"]
 
     def calculate_score(self, dt):
-        # Time survived component (10 points/sec)
-        time_points = 100 * dt
+        for player in self.players:
+            if not player.check_game_over():
+                time_points = 100 * dt
 
-        # Position component (0-50 points/sec based on right position)
-        player_x = self.player.player.x
-        screen_width = self.screen.get_width()
+                player_x = player.player.x
+                screen_width = self.screen.get_width()
 
-        # Ensure player X position stays within screen bounds (0 to screen_width)
-        # so we can fairly calculate how far to the right they've progressed
-        clamped_x = max(0, min(player_x, screen_width))
-        position_ratio = clamped_x / screen_width
-        position_points = 100 * position_ratio * dt
+                clamped_x = max(0, min(player_x, screen_width))
+                position_ratio = clamped_x / screen_width
+                position_points = 100 * position_ratio * dt
 
-        # Update total score
-        self.score += time_points + position_points
+                # Update total score
+                player.score += time_points + position_points
 
     def draw_score(self):
-        # Create text surface
-        score_text = self.font.render(f"SCORE: {int(self.score)}", True, (255, 255, 255))
-        text_rect = score_text.get_rect(topright=(self.SCREEN_WIDTH - 20, 20))
+        y_offset = 20  # Start position from top
+        for i, player in enumerate(self.players):
+            # Create text with white color
+            score_text = self.font.render(f"P{i + 1}: {int(player.score)}", True, (255, 255, 255))
+            text_rect = score_text.get_rect(topright=(self.SCREEN_WIDTH - 20, y_offset))
+            bg_rect = text_rect.inflate(20, 10)  # Add padding around text
 
-        # Create background rectangle
-        bg_rect = text_rect.inflate(20, 10)
-        pygame.draw.rect(self.screen, (0, 0, 0, 150), bg_rect)
+            # Draw background with player's specific color (from your array) with 150 alpha
+            box_color = (*player.colors[i], 150)  # RGBA format
+            pygame.draw.rect(self.screen, box_color, bg_rect)
 
-        # Draw elements
-        self.screen.blit(score_text, text_rect)
+            # Draw white text on top
+            self.screen.blit(score_text, text_rect)
+
+            y_offset += 60  # Space between score boxes
 
     def run_game_menu(self):
         pygame.font.init()
@@ -198,6 +211,7 @@ class Game:
             button_rects.append(button)
 
         while self.run:
+            pygame.event.pump()
             self.background.create_parallax(0.0001)
 
             # Slight dark overlay
@@ -215,13 +229,15 @@ class Game:
 
             # Handle events
             for event in pygame.event.get():
-                if event.type == pygame.QUIT:
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    # Check buttons immediately on click
+                    pos = pygame.mouse.get_pos()
+                    for button in buttons:
+                        if button["rect"].collidepoint(pos):
+                            return button["action"]
+                elif event.type == pygame.QUIT:
                     pygame.quit()
                     return "quit"
-                elif event.type == pygame.MOUSEBUTTONDOWN:
-                    for button in buttons:
-                        if button["rect"].collidepoint(event.pos):
-                            return button["action"]
 
             pygame.display.update()
         return None
@@ -259,7 +275,6 @@ class Game:
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    pygame.quit()
                     return "quit"
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     for button in buttons:
