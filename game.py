@@ -4,6 +4,7 @@ from background import Background
 from player import Player
 from world import World
 from network import Network
+from remoteplayer import RemotePlayer
 
 class Game:
     def __init__(self, num_players = 1, is_multiplayer = False):
