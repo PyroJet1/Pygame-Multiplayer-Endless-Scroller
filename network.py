@@ -31,8 +31,6 @@ class Network:
                 data, addr = self.sock.recvfrom(1024) #recvfrom UDP method addr returns a tuple (ip, port)
                 data = data.decode()
 
-
-
                 if data == "DISCOVER":
                     print(f"[NETWORK] Sending HELLO to {addr[0]}:{self.port}")
                     self.sock.sendto(f"HELLO {addr[0]}".encode(), (addr[0], self.port))
@@ -63,7 +61,7 @@ class Network:
     def broadcast_loop(self, timeout):
         end_time = time.time() + timeout
         while time.time() < end_time and self.discovery_running:
-            self.sock.sendto("DISCOVER".encode(), ("172.20.10.3", self.port))
+            self.sock.sendto("DISCOVER".encode(), ("255.255.255.255", self.port))
             time.sleep(1)
         print(f"[NETWORK] Found {len(self.game_players)} players")
 

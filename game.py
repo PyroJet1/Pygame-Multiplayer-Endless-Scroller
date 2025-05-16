@@ -29,11 +29,12 @@ class Game:
            self.network.close()
        if self.is_multiplayer:
            self.network = Network(self)
+
        else:
            self.network = None
 
        for i in range(num_players):  # Only create `num_players` instances
-           player = Player(self.screen, i + 1)
+           player = Player(self.screen, i + 1, self)
            self.players.append(player)
 
     def run_game(self):
@@ -281,7 +282,7 @@ class Game:
                                 return None  # Return to main menu
                             elif selected_value in [2, 3, 4]:
                                 # Start game with selected player count
-                                multiplayer_game = Game(num_players=selected_value)
+                                multiplayer_game = Game(num_players=selected_value, is_multiplayer=True)
                                 if multiplayer_game.show_loading_screen():
                                     result = multiplayer_game.run_game()
                                 # If game returns "quit", propagate it
@@ -304,6 +305,9 @@ class Game:
         loading_text = font.render("Searching for players...", True, (255, 255, 255))
         text_rect = loading_text.get_rect(center=(self.SCREEN_WIDTH // 2, self.SCREEN_HEIGHT // 2))
         start_time = time.time()
+
+        if self.is_multiplayer:
+            self.network.broadcast()
 
         while self.run:
             self.background.create_parallax(0.0001)
