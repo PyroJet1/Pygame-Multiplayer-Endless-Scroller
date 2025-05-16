@@ -288,6 +288,8 @@ class Game:
                             if selected_value == "back":
                                 return None  # Return to main menu
                             elif selected_value in [2, 3, 4]:
+                                if self.network is not None:
+                                    self.network.close()
                                 # Start game with selected player count
                                 multiplayer_game = Game(num_players=selected_value, is_multiplayer=True)
                                 if multiplayer_game.show_loading_screen():
@@ -326,9 +328,10 @@ class Game:
                 print("[NETWORK] Discovery Timeout")
 
             # Check if peers are found or timeout
-            if len(self.network.game_players) >= required_players:
+            with self.network.players_lock:  # Acquire lock
+                current_count = len(self.network.game_players)
+            if current_count >= required_players:
                 print(f"[NETWORK] Found players: {self.network.game_players}")
-                # Add remote players here if necessary
                 return True
 
             # Event handling to prevent freeze

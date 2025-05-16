@@ -11,6 +11,7 @@ class Network:
         self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1) #allows to broadcast messages. SOL_SOCK is the socket layer, changing option independent of protocol
         self.sock.bind(("0.0.0.0", self.port))
         self.game_players = []
+        self.players_lock = threading.Lock()
         self.players_last_online = {}
         self.running = True
         self.discovery_running = False
@@ -45,14 +46,15 @@ class Network:
                     self.players_last_online[addr] = time.time()
                 elif data.startswith("HELLO"):
                     print(f"[NETWORK] Received HELLO from {addr}")
-                    if addr not in self.game_players:
-                        self.game_players.append(addr)
-                        self.game.add_remote_player(addr)  # You'll need to implement this method
+                    with self.players_lock:
+                        if addr not in self.game_players:
+                            self.game_players.append(addr)
+                            self.game.add_remote_player(addr)
 
             except Exception as e:
                 print(f"ERROR-IN-RECEIVE: {e}")
 
-    def broadcast(self, timeout = 10):
+    def broadcast(self, timeout = 15):
         print("[NETWORK] Starting LAN discovery...")
         self.discovery_running = True
 
